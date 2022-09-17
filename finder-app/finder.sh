@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -gt 1 ]; then
     if [ -d $1 ]; then
