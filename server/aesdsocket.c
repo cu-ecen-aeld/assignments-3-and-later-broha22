@@ -63,8 +63,8 @@ int main (int argc, char *argv[]) {
             continue;
         }
         int enable = 1;
-        setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &enable, (socklen_t)1);
-        setsockopt(sock_fd, SOL_SOCKET, SO_REUSEPORT, &enable, (socklen_t)1);
+        setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &enable, (socklen_t)sizeof(int));
+        setsockopt(sock_fd, SOL_SOCKET, SO_REUSEPORT, &enable, (socklen_t)sizeof(int));
 
         if (bind(sock_fd, rp->ai_addr, rp->ai_addrlen) == 0) break;
     }
@@ -74,6 +74,27 @@ int main (int argc, char *argv[]) {
         free(buffer);
         closelog();
         return -1;
+    }
+    if (argc > 1 && strcmp(argv[1], "-d") == 0) {
+        int fork_v = fork();
+        if (fork_v < 0) {
+            free(buffer);
+            closelog();
+            return -1;
+        } else if (fork_v > 0) {
+            usleep(50000);
+            return 0;
+        } else {
+            setsid();
+            fork_v = fork();
+            if (fork_v < 0) {
+                free(buffer);
+                closelog();
+                return -1;
+            } else if (fork_v > 0) {
+                return 0;
+            }
+        }
     }
     listen(sock_fd, 5);
 
